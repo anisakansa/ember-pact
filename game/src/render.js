@@ -104,8 +104,13 @@ function combatScreen(run) {
   const c = run.combat;
   const enemies = c.enemies.map((e, i) => {
     const intent = e.intent;
+    // Telegraph the real damage: strength, chill, and weak all shape it.
+    const intentDmg = !intent || intent.kind !== 'attack' ? 0
+      : e.status.weak
+        ? Math.floor(Math.max(0, (intent.dmg || 0) + (e.status.strength || 0) - (e.status.chill || 0)) * 0.75)
+        : Math.max(0, (intent.dmg || 0) + (e.status.strength || 0) - (e.status.chill || 0));
     const intentText = !intent ? '' : intent.kind === 'attack'
-      ? `⚔️ Attacks for ${Math.max(0, (intent.dmg || 0) + (e.status.strength || 0) - (e.status.chill || 0))}`
+      ? `⚔️ Attacks for ${intentDmg}`
       : intent.kind === 'block' ? `🛡️ Blocks ${intent.block}`
       : intent.kind === 'buff' ? `⬆️ Gains ${intent.strength} Strength`
       : `🌀 ${intent.text || 'Debuff'}`;

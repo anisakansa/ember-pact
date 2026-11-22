@@ -102,6 +102,9 @@ export function handleAction(run, action, el) {
       const fresh = newRun(run.seed === undefined ? Date.now() % 100000 : run.seed);
       Object.keys(run).forEach((k) => delete run[k]);
       Object.assign(run, fresh);
+      // A new run starts at the map — without this the title's only button
+      // rebuilt the run and left the player on the title forever.
+      run.screen = 'map';
       break;
     }
     case 'how':

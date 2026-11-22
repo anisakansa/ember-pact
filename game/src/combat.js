@@ -82,6 +82,9 @@ function dealDamageToEnemy(run, combat, enemy, raw, source) {
 
 export function hurtPlayer(run, combat, raw, ignoreBlock) {
   let dmg = raw;
+  // Vulnerable: the player takes 50% more attack damage. Burn ticks pass
+  // ignoreBlock, and HP loss is not an attack, so they stay unamplified.
+  if (!ignoreBlock && combat.player.status.vulnerable) dmg = Math.floor(dmg * 1.5);
   if (!ignoreBlock) {
     const blocked = Math.min(combat.player.block, dmg);
     combat.player.block -= blocked;
@@ -178,6 +181,16 @@ function checkCombatEnd(run, combat) {
 // End the player's turn: every living enemy acts on its telegraphed intent.
 export function endTurn(run, combat, rng) {
   if (combat.over) return;
+  // Weak on the player lasts exactly one player turn: it expires at this
+  // boundary, after the player has played with it. Vulnerable lasts until
+  // the end of the enemy phase instead — damage only arrives while the
+  // enemies act, so stacks from an earlier phase expire at the end of this
+  // function, never stacks applied during this phase. Snapshot them first.
+  // (The old code deleted both at the end of this function, wiping debuffs
+  // the enemies had just applied, so Weak/Vulnerable on the player never
+  // did anything.)
+  if (combat.player.status.weak) delete combat.player.status.weak;
+  const vulnAtStart = combat.player.status.vulnerable || 0;
   // Discard the hand.
   combat.discardPile.push(...combat.hand);
   combat.hand = [];
@@ -196,6 +209,8 @@ export function endTurn(run, combat, rng) {
     let dmg = move.dmg || 0;
     dmg += enemy.status.strength || 0;
     dmg = Math.max(0, dmg - (enemy.status.chill || 0));
+    // Weak: a weakened enemy deals 25% less attack damage.
+    if (enemy.status.weak) dmg = Math.max(0, Math.floor(dmg * 0.75));
     if (move.kind === 'attack') {
       hurtPlayer(run, combat, dmg);
       if (move.weak) applyStatus(combat.player, 'weak', move.weak);
@@ -218,9 +233,18 @@ export function endTurn(run, combat, rng) {
     enemy.moveIndex += 1;
     enemy.intent = enemyIntent(enemy);
   }
-  // Statuses decay: weak/vulnerable on the player last one turn.
-  if (combat.player.status.weak) delete combat.player.status.weak;
-  if (combat.player.status.vulnerable) delete combat.player.status.vulnerable;
+  // Enemy weak/vulnerable last one round: they expire after the enemies acted.
+  for (const enemy of combat.enemies) {
+    if (enemy.status.weak) delete enemy.status.weak;
+    if (enemy.status.vulnerable) delete enemy.status.vulnerable;
+  }
+  // Player vulnerable from an earlier phase expires now; stacks applied
+  // during this phase stay for the next round.
+  if (vulnAtStart > 0) {
+    const left = (combat.player.status.vulnerable || 0) - vulnAtStart;
+    if (left > 0) combat.player.status.vulnerable = left;
+    else delete combat.player.status.vulnerable;
+  }
   if (!combat.over) beginTurn(run, combat, rng);
 }
 
