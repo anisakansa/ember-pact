@@ -1,0 +1,129 @@
+/* Ember Pact — a dark tavern table with ember-gold trim. No images, no web
+   fonts: every shape is CSS, so the game loads with zero network requests. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #14100c radial-gradient(ellipse at 50% 0%, #2a1f14 0%, #14100c 60%);
+  color: #f3ead9;
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+}
+#app { max-width: 1280px; margin: 0 auto; padding: 12px 20px 28px; }
+.muted { color: #b8a888; }
+h1 { font-size: 64px; letter-spacing: 6px; margin: 8px 0; color: #fbbf24;
+  text-shadow: 0 0 24px rgba(251,191,36,.45), 0 2px 0 #7c2d12; }
+h2 { font-size: 30px; margin: 10px 0 4px; color: #fde68a; }
+h3 { font-size: 20px; margin: 18px 0 8px; color: #fcd34d; }
+button { font-family: inherit; cursor: pointer; }
+.btn {
+  background: #78350f; color: #fef3c7; border: 2px solid #f59e0b;
+  border-radius: 10px; padding: 10px 18px; font-size: 17px; font-weight: bold;
+}
+.btn:hover:not(:disabled) { background: #92400e; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.big { font-size: 20px; padding: 14px 28px; }
+.row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+.big-line { font-size: 22px; }
+
+/* ---- HUD ---- */
+.hud { display: flex; gap: 18px; flex-wrap: wrap; background: rgba(0,0,0,.45);
+  border: 1px solid #57534e; border-radius: 10px; padding: 8px 14px; font-size: 18px; }
+.hud-item b { color: #fde68a; }
+.relics { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; font-size: 15px; }
+.relic { background: #292524; border: 1px solid #a16207; border-radius: 8px; padding: 4px 10px; }
+.relic.big { font-size: 17px; padding: 10px 14px; }
+.chip { display: inline-block; background: #1c1917; border: 1px solid var(--c, #fff);
+  color: var(--c, #fff); border-radius: 20px; padding: 1px 8px; font-size: 13px; margin: 2px; }
+
+/* ---- Title ---- */
+.screen.title { text-align: center; padding-top: 70px; }
+.title-glyphs span { font-size: 44px; margin: 0 10px; }
+.title-glyphs span:nth-child(1) { color: #e5484d; }
+.title-glyphs span:nth-child(2) { color: #38bdf8; }
+.title-glyphs span:nth-child(3) { color: #4ade80; }
+.title-glyphs span:nth-child(4) { color: #c084fc; }
+.tagline { font-size: 20px; color: #d6c9a8; line-height: 1.5; }
+.title-buttons { display: flex; gap: 14px; justify-content: center; margin: 26px 0; }
+.how { max-width: 720px; margin: 0 auto; text-align: left; background: rgba(0,0,0,.5);
+  border: 1px solid #78716c; border-radius: 12px; padding: 6px 20px; font-size: 16px; line-height: 1.5; }
+.sw { font-weight: bold; color: var(--c); }
+.foot { margin-top: 40px; color: #78716c; font-size: 14px; }
+
+/* ---- Map ---- */
+.map { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 12px; }
+.map-row { display: flex; gap: 26px; justify-content: center; }
+.map-path { color: #a16207; font-size: 20px; line-height: 1; }
+.node { width: 210px; background: #1c1917; color: #f3ead9; border: 2px solid #57534e;
+  border-radius: 12px; padding: 12px; text-align: center; }
+.node.available { border-color: #f59e0b; background: #292524; box-shadow: 0 0 14px rgba(245,158,11,.35); }
+.node.available:hover { background: #44403c; }
+.node.done { opacity: .45; border-color: #22c55e; }
+.node.locked { opacity: .4; }
+.node.boss { width: 320px; border-color: #dc2626; }
+.node.boss.available { box-shadow: 0 0 18px rgba(220,38,38,.5); }
+.node-ico { display: block; font-size: 26px; }
+.node-name { display: block; font-size: 18px; font-weight: bold; margin: 2px 0; }
+.node-tip { display: block; font-size: 12.5px; color: #b8a888; line-height: 1.3; }
+
+/* ---- Combat ---- */
+.battlefield { display: flex; flex-direction: column; gap: 10px; }
+.enemies { display: flex; gap: 18px; justify-content: center; margin-top: 10px; min-height: 190px; }
+.enemy { width: 300px; background: rgba(0,0,0,.5); border: 2px solid var(--ec, #888);
+  border-radius: 14px; padding: 10px 14px; text-align: center; cursor: pointer; }
+.enemy.targeted { box-shadow: 0 0 0 3px #fbbf24; }
+.enemy.dead { opacity: .3; }
+.enemy-glyph { font-size: 52px; line-height: 1.1; }
+.enemy-name { font-size: 21px; font-weight: bold; }
+.hpbar { position: relative; background: #292524; border: 1px solid #78716c;
+  border-radius: 8px; height: 24px; margin: 6px 0; overflow: hidden; }
+.hpbar.big { height: 28px; }
+.hpfill { height: 100%; background: linear-gradient(90deg, #dc2626, #ef4444); transition: width .3s; }
+.hptext { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: bold; color: #fff; text-shadow: 0 1px 2px #000; }
+.intent { font-size: 16px; color: #fca5a5; font-weight: bold; min-height: 20px; }
+.player-side { background: rgba(0,0,0,.45); border: 1px solid #57534e; border-radius: 12px; padding: 10px 16px; }
+.player-plate { display: flex; gap: 16px; align-items: center; }
+.player-glyph { font-size: 44px; }
+.player-name { font-size: 19px; font-weight: bold; }
+.player-plate .hpbar { width: 340px; }
+.energy { margin-left: auto; text-align: center; }
+.energy-num { display: inline-flex; width: 54px; height: 54px; border-radius: 50%;
+  background: #0c4a6e; border: 3px solid #38bdf8; color: #fff; font-size: 28px;
+  font-weight: bold; align-items: center; justify-content: center; }
+.energy-label { display: block; font-size: 13px; color: #7dd3fc; }
+.turn-row { display: flex; gap: 18px; align-items: center; justify-content: space-between; margin-top: 8px; }
+.hint { color: #b8a888; font-size: 14px; }
+.combat-msg { color: #fca5a5; font-weight: bold; margin-top: 6px; }
+.hand { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; min-height: 220px; padding: 6px 0; }
+.hand.center { justify-content: center; }
+
+/* ---- Cards ---- */
+.card { position: relative; width: 148px; height: 208px; flex: 0 0 auto;
+  background: linear-gradient(180deg, #292524 0%, #1c1917 100%);
+  border: 3px solid var(--suit); border-radius: 12px; padding: 10px 10px 8px;
+  color: #f5f5f4; cursor: pointer; transition: transform .12s, box-shadow .12s;
+  box-shadow: 0 4px 12px rgba(0,0,0,.6); text-align: center; }
+.card:hover { transform: translateY(-10px); }
+.card.selected { transform: translateY(-14px); box-shadow: 0 0 0 3px #fbbf24, 0 8px 18px rgba(0,0,0,.7); }
+.card.disabled { opacity: .55; }
+.card-cost { position: absolute; top: -8px; left: -8px; width: 34px; height: 34px; border-radius: 50%;
+  background: #0c4a6e; border: 2px solid #e0f2fe; color: #fff; font-size: 20px; font-weight: bold;
+  display: flex; align-items: center; justify-content: center; }
+.card-glyph { font-size: 40px; color: var(--suit); line-height: 1.15; }
+.card-name { font-size: 16.5px; font-weight: bold; margin-top: 2px; min-height: 40px; }
+.card-type { font-size: 12px; color: var(--suit); text-transform: uppercase; letter-spacing: 1px; }
+.card-text { font-size: 13.5px; line-height: 1.35; color: #e7e5e4; margin-top: 6px; }
+
+/* ---- Shop / rest / reward ---- */
+.shop-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+/* ---- End screens ---- */
+.screen.end { text-align: center; padding-top: 50px; }
+.screen.end h1 { font-size: 72px; }
+.screen.end.win h1 { color: #fbbf24; }
+.screen.end.lose h1 { color: #ef4444; text-shadow: 0 0 24px rgba(239,68,68,.4), 0 2px 0 #450a0a; }
+.end-glyph { font-size: 72px; }
+.stats { display: grid; grid-template-columns: repeat(3, 200px); gap: 12px; justify-content: center; margin: 26px 0; }
+.stats div { background: rgba(0,0,0,.5); border: 1px solid #57534e; border-radius: 10px; padding: 12px; }
+.stats span { display: block; color: #b8a888; font-size: 14px; }
+.stats b { font-size: 26px; color: #fde68a; }
